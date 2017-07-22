@@ -1,3 +1,5 @@
+'use strict';
+
 // detect native/existing fragmention support
 if (!('fragmention' in window.location)) (function () {
 	// populate fragmention
@@ -8,7 +10,7 @@ if (!('fragmention' in window.location)) (function () {
 		// iterate descendants of scope
 		for (var all = scope.childNodes, index = 0, element, list = []; (element = all[index]); ++index) {
 			// conditionally return element containing visible, whitespace-insensitive, case-sensitive text (a match)
-			if (element.nodeType === 1 && (element.innerText || element.textContent || '').replace(/\s+/g, ' ').indexOf(text) !== -1) {
+			if (element.nodeType === 1 && (element.textContent || element.innerText || '').replace(/\s+/g, ' ').indexOf(text) !== -1) {
 				list = list.concat(getElementsByText(element, text));
 			}
 		}
@@ -19,16 +21,15 @@ if (!('fragmention' in window.location)) (function () {
 
 	function getAnchorableElementByName(fragment) {
 		var elements = document.getElementsByName(fragment), index = -1;
-
 		while (elements[++index] && !/^A(REA)?$/.test(elements[index].nodeName)) {}
 
 		return elements[index];
 	}
 
-	// on dom ready or hash change
-	function onHashChange() {
-		// do nothing if the dom is not ready
-		if (!/e/.test(document.readyState)) return;
+	// on dom ready or hash change; set the fragmention
+	function setFragmention() {
+		// do nothing if the dom is not ready (why is this here?)
+		// if (!/e/.test(document.readyState)) return;
 
 		// set location fragmention as uri-decoded text (from href, as hash may be decoded)
 		var
@@ -58,13 +59,14 @@ if (!('fragmention' in window.location)) (function () {
 			length   = elements.length,
 			// get index of element
 			modulus  = length && location.fragmentionIndex % length,
-			index    = length && modulus >= 0 ? modulus : length + modulus;
+			index	= length && modulus >= 0 ? modulus : length + modulus;
 
 			// get element
 			element = length && elements[index];
 
 			// if element found
 			if (element) {
+
 				// scroll to element
 				element.scrollIntoView();
 
@@ -83,16 +85,12 @@ if (!('fragmention' in window.location)) (function () {
 		}
 	}
 
-	var
-	// DEPRECATED: configure listeners
-	defaultListener = 'addEventListener',
-	addEventListener = defaultListener in window ? [defaultListener, ''] : ['attachEvent', 'on'],
 	// set stashed element
-	element;
+	var element;
 
-	// add listeners
-	window[addEventListener[0]](addEventListener[1] + 'hashchange', onHashChange);
-	document[addEventListener[0]](addEventListener[1] + 'readystatechange', onHashChange);
+	// add listeners for hashchange and readystate
+	window.addEventListener("hashchange", setFragmention, false);
+	document.addEventListener('readystatechange', setFragmention, false);
 
-	onHashChange();
+	setFragmention();
 })();
